@@ -9,8 +9,8 @@ var uiController = (function(){
     return{
         getInput: function(){
             return{
-                type: document.querySelector(DOMstrings.inputType).value,
-                description: document.querySelector(DOMstrings.inputDescription).value,
+                type: document.querySelector(DOMstrings.inputType).value,   // exp, inc
+                description: document.querySelector(DOMstrings.inputDescription).value, 
                 value: document.querySelector(DOMstrings.inputValue).value                
             };
         },
@@ -32,9 +32,9 @@ var financeController = (function(){
         this.id = id;
         this.description = description;
         this.value = value;    
-    }
+    };
     var data = {
-        allItems: {
+        items: {
             inc: [],
             exp: []
         },
@@ -42,15 +42,37 @@ var financeController = (function(){
             inc: 0,
             exp: 0
         }
-    }
+    };
+    // closure-тай public service
+    return{
+        addItem: function(type, desc, val){
+            var item, id;
+            // id буюу idenetification - тодорхойлдог хүчин зүйл
+            if(data.items[type].length === 0 ) id = 1;
+            else {
+                id = data.items[type][data.items[type].length - 1].id + 1; 
+            }
+            if (type === 'inc'){
+                item = new Income(id, desc, val);
+            } else {    // type === 'exp'
+            item = new Expense(id, desc, val);
+            }
+            data.items[type].push();
+        }
+       /*  seeData: function(){
+            return data;
+        } */
+    };
 })();
 // Программын холбогч контроллер
 var appController = (function(uiController, financeController){
     
     var ctrlAddItem = function(){
         // 1. Оруулах өгөгдлийг дэлгэцээс олж авна.
-        console.log(uiController.getInput());
+        var input = uiController.getInput();
+        console.log(input);
         // 2. Олж авсан өгөгдлүүдээ санхүүгийн контроллерт дамжуулж тэнд хадгална.
+        financeController.addItem(input.type, input.description, input.value);
         // 3. Олж авсан өгөгдлүүдээ вэб дээр тохирох хэсэгт гаргана.
         // 4. Төсвийг тооцоолно.
         // 5. Эцсийн үлдэгдэл, тооцоог дэлгэцэд гаргана.
