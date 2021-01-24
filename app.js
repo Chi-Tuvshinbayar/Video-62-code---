@@ -11,6 +11,7 @@ var uiController = (function(){
         incomeLabel: '.budget__income--value',
         expenseLabel: '.budget__expenses--value',
         percentageLabel: '.budget__expenses--percentage',
+        containerDiv: '.container'
     };
     return{
         getInput: function(){
@@ -50,15 +51,20 @@ var uiController = (function(){
             
         },
 
+        deleteListItem: function(id){
+            var el = document.getElementById(id);
+            el.parentNode.removeChild(el);
+        },
+
         addListItem: function(item, type){
             // 1. Орлого зарлагын элементийг агуулсан html-ыг бэлтгэнэ.
             var html, list;
             if (type === 'inc'){
                 list = DOMstrings.incomeList;
-                html = '<div class="item clearfix" id="income-%ID%"><div class="item__description">$$DESCRIPTION$$</div><div class="right clearfix"><div class="item__value">$$VALUE$$</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="inc-%ID%"><div class="item__description">$$DESCRIPTION$$</div><div class="right clearfix"><div class="item__value">$$VALUE$$</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             } else {
                 list = DOMstrings.expensesList;
-                html = '<div class="item clearfix" id="expense-%ID%"><div class="item__description">$$DESCRIPTION$$</div><div class="right clearfix"><div class="item__value">$$VALUE$$</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+                html = '<div class="item clearfix" id="exp-%ID%"><div class="item__description">$$DESCRIPTION$$</div><div class="right clearfix"><div class="item__value">$$VALUE$$</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }
             // 2. Тэр HTML дотроо орлого зарлагын утгуудыг REPLACE ашиглаж өөрчилж өгнө
             html = html.replace('%ID%', item.id);
@@ -124,6 +130,26 @@ var financeController = (function(){
                 totalExp: data.totals.exp
             }
         },
+        // Устгах товч дарах үед устгах функц  
+        deleteItem: function(type, id){
+            // MAP-ыг ашиглаж inc, exp товч дарсан эсэхээс хамаарч тэдгээрийн id-аар massive үүсгэнэ.
+            var ids = data.items[type].map(function(el){
+                return el.id;
+            });
+            // console.log('ids: ' + ids);
+            // товч дарсан id-ыг "-1"-ээс ялгаатай бол устгах үйлдэл хийнэ.
+            // Учир нь id нь тухайн massive-т байхгүй бол INDEXOF нь -1 гэсэн утга буцаадаг.
+            // SPLICE-д хэдэн хасах утга түүний тоогоор massive сүүлээс устгадаг.
+            // Тиймээс SPLICE-д -1 утгатай index гэж дамжуулах юм бол хамгийн сүүлийн element-ыг устгана.
+            // Иймээс буруу element-ыг устгахгүй нь тул -1-тэй тэнцэж байгаа эсэхийг шалгаж massive-аас element-ыг устгаж байна.
+            var index = ids.indexOf(id);
+            // console.log('index: ' + index);
+            if(index !== -1){
+                // console.log('Ustgakh gej bn!!!');
+                data.items[type].splice(index, 1);
+            }
+        },
+
         addItem: function(type, desc, val){
             var item, id;
             // id буюу idenetification - тодорхойлдог хүчин зүйл
@@ -181,6 +207,23 @@ var appController = (function(uiController, financeController){
             if(event.keyCode === 13 || event.which === 13 ) {
                 ctrlAddItem();
             }
+        });
+        // Орлого, зарлага дээр дарах үеийн утгыг устгах
+        document.querySelector(DOM.containerDiv).addEventListener('click', function(event){
+            var id = event.target.parentNode.parentNode.parentNode.parentNode.id;
+            // inc-2 -ыг ялгах
+            if(id){
+                var arr = id.split('-');
+                var type = arr[0];
+                var itemId = parseInt(arr[1]);
+                // console.log(type + '--> ' + itemId);
+                // 1. Санхүүгийн модулиас type, id ашиглаад устгана.
+                financeController.deleteItem(type, itemId);
+                // 2. Дэлгэц дээрээс энэ элементийг устгана.
+                uiController.deleteListItem(id);
+                // 3. Үлдэглдэл тооцоог шинэчилж харуулна.
+            }
+            
         });
     }
 
