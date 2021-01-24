@@ -13,7 +13,7 @@ var uiController = (function(){
         percentageLabel: '.budget__expenses--percentage',
         containerDiv: '.container',
         expensePercentageLabel: '.item__percentage',
-        dateLabel: '.budget__title--month'        
+        dateLabel: '.budget__title--month'   
     };
     // Node-ын жагсаалтыг тооцох өөрсдөө зохион forEach-тэй ижилхэн үүрэгтэй функц
     var nodeListForEach = function(list, callback){
@@ -44,6 +44,13 @@ var uiController = (function(){
         displayDate: function(){
             var unuudur = new Date();
             document.querySelector(DOMstrings.dateLabel).textContent = unuudur.getFullYear() + ' оны ' + unuudur.getMonth() + ' сарын ';
+        },
+        chnageType: function(){
+            var fields = document.querySelectorAll(DOMstrings.inputType + ', ' + DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
+            nodeListForEach(fields, function(el){
+                el.classList.toggle('red-focus');
+            });
+            document.querySelector(DOMstrings.addBtn).classList.toggle('red');
         },
         getInput: function(){
             return{
@@ -290,6 +297,8 @@ var appController = (function(uiController, financeController){
                 ctrlAddItem();
             }
         });
+        // +,- хамаарч өнгө нь өөр болгодог
+        document.querySelector(DOM.inputType).addEventListener('change', uiController.chnageType);
         // Орлого, зарлага дээр дарах үеийн утгыг устгах
         document.querySelector(DOM.containerDiv).addEventListener('click', function(event){
             var id = event.target.parentNode.parentNode.parentNode.parentNode.id;
